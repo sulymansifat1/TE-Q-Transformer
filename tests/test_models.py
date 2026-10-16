@@ -1,27 +1,13 @@
-"""Unit tests for TE-Q-Transformer and baseline models instantiation and forward pass."""
+"""Unit tests for TE-Q-Transformer architecture instantiation and forward pass."""
 
 import unittest
 import torch
 
-from models.proposed import TEQTransformer, rich_entangler_config
-from models.baselines import (
-    CNN1DModel,
-    TCNModel,
-    DLinearSOHModel,
-    TransformerModel,
-    PatchTSTSOHModel,
-    ITransformerSOHModel,
-    QLSTMSOHModel,
-    QNNGRUModel,
-    LSTMModel,
-    GRUModel,
-    get_baseline_model,
-    list_baselines,
-)
+from models.proposed import TEQTransformer, TEQTransformerConfig, rich_entangler_config
 
 
 class TestModels(unittest.TestCase):
-    """Verifies that all models instantiate and perform forward inference."""
+    """Verifies that TE-Q-Transformer instantiates and performs forward inference."""
 
     def setUp(self):
         self.batch_size = 2
@@ -36,46 +22,37 @@ class TestModels(unittest.TestCase):
         self.dummy_x[:, :, 2] = 24.0  # Physical temperature in Celsius
 
     def test_te_q_transformer_forward(self):
-        """Verifies proposed TE-Q-Transformer forward pass."""
+        """Verifies proposed TE-Q-Transformer forward pass [B, 512, 4] -> [B]."""
         model = TEQTransformer(rich_entangler_config())
         model.eval()
         with torch.no_grad():
             out = model(self.dummy_x)
         self.assertEqual(out.shape, (self.batch_size,))
         self.assertFalse(torch.isnan(out).any())
+        self.assertTrue(torch.isfinite(out).all())
 
-    def test_all_baselines_forward(self):
-        """Verifies that all 10 active baselines complete forward pass [2, 512, 4] -> [2]."""
-        baselines = {
-            "LSTM": LSTMModel(),
-            "GRU": GRUModel(),
-            "CNN1D": CNN1DModel(),
-            "TCN": TCNModel(),
-            "DLinear": DLinearSOHModel(),
-            "Transformer": TransformerModel(),
-            "PatchTST": PatchTSTSOHModel(),
-            "iTransformer": ITransformerSOHModel(),
-            "QLSTM": QLSTMSOHModel(seq_len=8),  # test on shorter seq for fast unit test
-            "QNN_GRU": QNNGRUModel(),
-        }
+    def test_te_q_transformer_batch_invariance(self):
+        """Verifies forward inference across single and multi-batch inputs."""
+        model = TEQTransformer(rich_entangler_config())
+        model.eval()
+        with torch.no_grad():
+            single_x = self.dummy_x[:1]
+            out_single = model(single_x)
+            self.assertEqual(out_single.shape, (1,))
 
-        for name, model in baselines.items():
-            with self.subTest(model_name=name):
-                model.eval()
-                with torch.no_grad():
-                    if name == "QLSTM":
-                        test_input = self.dummy_x[:, :8, :]
-                    else:
-                        test_input = self.dummy_x
-                    out = model(test_input)
-                self.assertEqual(out.shape, (self.batch_size,))
-                self.assertFalse(torch.isnan(out).any(), f"NaN output detected in {name}")
+            four_x = torch.cat([self.dummy_x, self.dummy_x], dim=0)
+            out_four = model(four_x)
+            self.assertEqual(out_four.shape, (4,))
 
-    def test_baseline_factory(self):
-        """Verifies get_baseline_model factory function."""
-        for name in list_baselines():
-            model = get_baseline_model(name)
-            self.assertIsInstance(model, torch.nn.Module)
+    def test_te_q_transformer_configs(self):
+        """Verifies default and rich entangler configuration initialization."""
+        cfg_default = TEQTransformerConfig()
+        model_def = TEQTransformer(cfg_default)
+        self.assertIsInstance(model_def, torch.nn.Module)
+
+        cfg_rich = rich_entangler_config()
+        self.assertEqual(cfg_rich.quantum_dim, 4)
+        self.assertEqual(cfg_rich.entangler_type, "rich")
 
 
 if __name__ == "__main__":

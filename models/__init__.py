@@ -1,9 +1,8 @@
 """Models package for TE-Q-Transformer research repository.
 
-Subpackages:
-- `models.proposed`: Proposed TE-Q-Transformer model and configurations.
-- `models.baselines`: Benchmark baseline models (CNN1D, TCN, DLinear, Transformer,
-  PatchTST, iTransformer, QLSTM, QNN-GRU, LSTM, GRU).
+Exports the proposed TE-Q-Transformer architecture and configuration factories.
+Baseline architectures for benchmark comparisons are self-contained under
+`notebooks/benchmark/baseline_comparison_nasa.ipynb`.
 """
 
 from models.proposed.te_q_transformer import (
@@ -11,12 +10,9 @@ from models.proposed.te_q_transformer import (
     TEQTransformerConfig,
     rich_entangler_config,
 )
-from models.baselines import get_baseline_model, list_baselines
 
 __all__ = [
     "TEQTransformer",
     "TEQTransformerConfig",
     "rich_entangler_config",
-    "get_baseline_model",
-    "list_baselines",
 ]

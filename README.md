@@ -11,11 +11,10 @@ TE-Q-Transformer is a hybrid quantum-classical deep learning framework for lithi
 
 ## Repository Contents
 
-- **Proposed Architecture (`models/proposed/`)**: Implementation of the TE-Q-Transformer architecture and its configuration factory (`TEQTransformer`, `TEQTransformerConfig`, `rich_entangler_config`).
-- **Baseline Models (`models/baselines/`)**: Implementations of 10 baseline architectures (LSTM, GRU, CNN1D, TCN, DLinear, Transformer, PatchTST, iTransformer, QLSTM, QNN-GRU) with a unified registry factory (`get_baseline_model`, `list_baselines`).
+- **Proposed Architecture (`models/`)**: Core implementation of the TE-Q-Transformer architecture, reference checkpoints, and configuration factories (`TEQTransformer`, `TEQTransformerConfig`, `rich_entangler_config`).
+- **Workflow Notebooks (`notebooks/`)**: Self-contained Jupyter notebooks for full contemporary baseline benchmarking (10 baselines), ablation studies, generalization experiments, formal statistical significance validation, explainability analysis, and CALCE cross-cell evaluation.
 - **Data Loaders & Preprocessing (`src/data/`)**: PyTorch Dataset classes, data loader generators, and zero-leakage feature scaling routines for NASA and CALCE battery datasets, plus CALCE raw-to-processed extraction scripts.
-- **Evaluation Utilities (`src/eval/`)**: Standard regression metrics calculation (`RMSE`, `MAE`, `MAPE`, `R2`, `MaxE`) and cross-cell evaluation routines.
-- **Workflow Notebooks (`notebooks/`)**: Self-contained Jupyter notebooks for full baseline benchmarking, ablation studies, generalization experiments, and CALCE cross-cell evaluation.
+- **Evaluation Utilities (`src/eval/`)**: Standard regression metrics calculation (`RMSE`, `MAE`, `MAPE`, `R2`, `MaxE`).
 - **Unit Test Suite (`tests/`)**: Automated tests verifying model forward passes, dataset array presence, tensor shape compliance, and scaling contracts.
 
 ---
@@ -38,7 +37,8 @@ TE-Q-Transformer is a hybrid quantum-classical deep learning framework for lithi
 ├── datasets/
 │   ├── README.md                              # Dataset documentation and contracts
 │   ├── NASA/
-│   │   └── processed/                         # Processed NASA arrays [N, 512, 4] and fitted scalers
+│   │   ├── processed/                         # Processed NASA arrays [N, 512, 4] and fitted scalers
+│   │   └── predictions/                       # Baseline predictions CSV for statistical significance
 │   └── CALCE/
 │       ├── README.md                          # CALCE dataset provenance and details
 │       └── processed/                         # Processed CALCE arrays [N, 512, 4] and metadata
@@ -47,21 +47,9 @@ TE-Q-Transformer is a hybrid quantum-classical deep learning framework for lithi
 │   ├── __init__.py                            # Model package entry point
 │   ├── checkpoints/
 │   │   └── nasa_teq_transformer_best.pth      # Pretrained reference TE-Q-Transformer weights
-│   ├── proposed/
-│   │   ├── __init__.py
-│   │   └── te_q_transformer.py                # TE-Q-Transformer architecture and config
-│   └── baselines/
-│       ├── __init__.py                        # Baseline registry and factory get_baseline_model()
-│       ├── cnn1d.py                           # 1D Temporal CNN baseline
-│       ├── tcn.py                             # Causal Dilated TCN baseline
-│       ├── dlinear.py                         # Series decomposition linear baseline
-│       ├── transformer.py                     # Classical Multi-Head Attention baseline
-│       ├── patchtst.py                        # Patch Time Series Transformer baseline
-│       ├── itransformer.py                    # Inverted Variate Transformer baseline
-│       ├── qlstm.py                           # Quantum LSTM baseline
-│       ├── qnn_gru.py                         # Quantum Neural Network + GRU baseline
-│       ├── lstm.py                            # Standard LSTM baseline
-│       └── gru.py                             # Standard GRU baseline
+│   └── proposed/
+│       ├── __init__.py
+│       └── te_q_transformer.py                # TE-Q-Transformer architecture and config
 │
 ├── notebooks/
 │   ├── benchmark/
@@ -96,7 +84,36 @@ TE-Q-Transformer is a hybrid quantum-classical deep learning framework for lithi
 
 ---
 
-## Environment & Installation
+## Running on Kaggle (Quick Start)
+
+Every workflow notebook is self-contained, dynamically resolves dataset and checkpoint paths, and can be executed immediately in Kaggle cloud environments:
+
+1. Create a new notebook on [Kaggle](https://www.kaggle.com/).
+2. Configure **Accelerator** under Notebook Settings:
+   - Select **GPU P100** or **GPU T4 x2** (Quantum circuit simulation executes significantly faster with CUDA acceleration).
+   - If using CPU, notebooks remain fully compatible.
+3. Set **Internet** to **ON** in the notebook settings panel (required for automatic PennyLane installation if not cached).
+4. In the initial notebook cell, clone the repository and install requirements:
+   ```bash
+   !git clone https://github.com/sulymansifat1/TE-Q-Transformer.git
+   %cd TE-Q-Transformer
+   !pip install -r requirements.txt
+   ```
+5. **Path Resolution & Datasets**:
+   - The processed `.npy` arrays for NASA and CALCE and reference model weights (`models/checkpoints/nasa_teq_transformer_best.pth`) are tracked directly in the Git repository.
+   - Every notebook automatically discovers its root whether running via Git clone in `/kaggle/working/TE-Q-Transformer` or attached as a Kaggle dataset under `/kaggle/input/`.
+   - All experimental figures and metric tables are automatically directed to a writable output directory (`/kaggle/working/outputs/`) to guarantee error-free execution against read-only mounts.
+6. Open and run the target notebook from the `notebooks/` directory:
+   - **Baseline Benchmark (10 Baselines + TE-Q-Transformer)**: `notebooks/benchmark/baseline_comparison_nasa.ipynb`
+   - **Statistical Significance Suite**: `notebooks/statistical_significance.ipynb`
+   - **Physics-Guided Explainability**: `notebooks/explainability.ipynb`
+   - **CALCE Evaluation**: `notebooks/Calce.ipynb`
+   - **Ablation Study**: `notebooks/ablation/ablation_study.ipynb`
+   - **Generalization Study**: `notebooks/generalization/generalization_study.ipynb`
+
+---
+
+## Local Environment & Installation
 
 ### Requirements
 - Python 3.10 or higher
@@ -207,25 +224,7 @@ soh_pred = model(x)
 print(f"Output shape: {soh_pred.shape}")  # torch.Size([2])
 ```
 
-### 2. Instantiating Baseline Models
-
-```python
-import torch
-from models.baselines import get_baseline_model, list_baselines
-
-# List available baseline architectures
-print(list_baselines())
-# ['LSTM', 'GRU', 'CNN1D', 'TCN', 'DLinear', 'Transformer', 'PatchTST', 'iTransformer', 'QLSTM', 'QNN_GRU']
-
-# Instantiate a baseline model by name
-model = get_baseline_model("Transformer")
-
-x = torch.randn(2, 512, 4)
-output = model(x)
-print(f"Baseline output shape: {output.shape}")  # torch.Size([2])
-```
-
-### 3. Loading Data
+### 2. Loading Battery Datasets (NASA & CALCE)
 
 #### NASA Ames DataLoaders
 ```python
@@ -251,7 +250,7 @@ for cell_id in CALCE_CELL_IDS:
     print(f"{cell_id}: X shape {X.shape}, y shape {y.shape}, cycles {len(cycles)}")
 ```
 
-### 4. Running Workflow Notebooks
+### 3. Running Workflow Notebooks
 
 The repository provides executable Jupyter notebooks under `notebooks/`:
 
@@ -266,29 +265,6 @@ The repository provides executable Jupyter notebooks under `notebooks/`:
 
 ---
 
-## Running on Kaggle
-
-Each notebook dynamically resolves repository paths and runs seamlessly across local, Google Colab, and Kaggle environments:
-
-1. Create a new notebook on [Kaggle](https://www.kaggle.com/).
-2. Configure **Accelerator** under Notebook Settings:
-   - Select **GPU P100** or **GPU T4 x2** (Quantum circuit simulation executes significantly faster with CUDA acceleration).
-   - If using CPU, notebooks remain fully compatible.
-3. Set **Internet** to **ON** in the notebook settings panel (required for automatic PennyLane installation if not cached).
-4. In the initial notebook cell, clone the repository and install requirements:
-   ```bash
-   !git clone https://github.com/sulymansifat1/TE-Q-Transformer.git
-   %cd TE-Q-Transformer
-   !pip install -r requirements.txt
-   ```
-5. **Path Resolution & Datasets**:
-   - The processed `.npy` arrays for NASA and CALCE and reference model weights (`models/checkpoints/nasa_teq_transformer_best.pth`) are tracked directly in the Git repository.
-   - Every notebook automatically discovers its root whether running via Git clone in `/kaggle/working/TE-Q-Transformer` or attached as a Kaggle dataset under `/kaggle/input/`.
-   - All experimental figures and metric tables are automatically directed to a writable output directory (`/kaggle/working/outputs/`) to guarantee error-free execution against read-only mounts.
-6. Open and run the target notebook from the `notebooks/` directory.
-
----
-
 ## Testing
 
 The test suite validates model construction, dataset integrity, and preprocessing rules:
@@ -300,9 +276,9 @@ python -m unittest discover -s tests -p "test_*.py"
 ### What the Tests Verify
 
 - **`tests/test_models.py`**:
-  - Instantiates `TEQTransformer` with `rich_entangler_config()` and confirms the forward pass transforms `[2, 512, 4]` to `[2]` without NaN outputs.
-  - Instantiates all 10 baseline models and confirms forward pass execution.
-  - Verifies the `get_baseline_model` factory against all registered baseline names.
+  - Instantiates `TEQTransformer` with `rich_entangler_config()` and confirms the forward pass transforms `[B, 512, 4]` to `[B]` without NaN or infinite outputs.
+  - Verifies batch invariance across single and multi-cycle evaluation windows.
+  - Validates configuration parameters against the authoritative manuscript settings.
 - **`tests/test_datasets.py`**:
   - Verifies the physical presence of all required `.npy` arrays for NASA (`B0005`, `B0006`, `B0007`, `B0018`, `B0029`, `B0030`, `B0031`, `B0032`, `B0053`).
   - Verifies the physical presence of processed CALCE files (`CS2_35`, `CS2_36`, `CS2_37`, `CS2_38`).
