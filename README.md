@@ -7,7 +7,7 @@
 
 TE-Q-Transformer is a hybrid quantum-classical deep learning framework for lithium-ion battery state-of-health (SOH) estimation. The codebase addresses cycle-level capacity degradation estimation by integrating physics-guided Arrhenius temperature transformations directly into a parameterized quantum circuit representation. The core implementation couples temperature-dependent degradation kinetics with a four-qubit simulated variational circuit, a 1D convolutional smoothing layer, and a multi-layer Transformer encoder backbone. This repository provides the complete model implementation, baseline architectures, data loading pipelines, evaluation routines, unit tests, and notebook workflows to reproduce the experimental pipeline.
 
----
+----
 
 ## Repository Contents
 
