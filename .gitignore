@@ -36,10 +36,12 @@ datasets/CALCE/raw/
 *.pt
 *.ckpt
 *.bin
+!models/checkpoints/*.pth
 artifacts/
 configs/
 
 # Experimental outputs, results, reports, figures, logs
+outputs/
 results/
 reports/
 Experiment/

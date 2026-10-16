@@ -45,6 +45,8 @@ TE-Q-Transformer is a hybrid quantum-classical deep learning framework for lithi
 │
 ├── models/
 │   ├── __init__.py                            # Model package entry point
+│   ├── checkpoints/
+│   │   └── nasa_teq_transformer_best.pth      # Pretrained reference TE-Q-Transformer weights
 │   ├── proposed/
 │   │   ├── __init__.py
 │   │   └── te_q_transformer.py                # TE-Q-Transformer architecture and config
@@ -68,6 +70,7 @@ TE-Q-Transformer is a hybrid quantum-classical deep learning framework for lithi
 │   │   └── ablation_study.ipynb               # Architectural component ablation experiments
 │   ├── generalization/
 │   │   └── generalization_study.ipynb         # Unseen-cell and temporal extrapolation experiments
+│   ├── explainability.ipynb                   # Integrated Gradients feature attributions & temperature sensitivity
 │   └── Calce.ipynb                            # CALCE cross-cell and temporal extrapolation evaluation
 │
 ├── src/
@@ -258,26 +261,30 @@ The repository provides executable Jupyter notebooks under `notebooks/`:
 | **All Models Benchmark** | `notebooks/benchmark/all_models_benchmark.ipynb` | Trains and evaluates TE-Q-Transformer and all 10 baseline architectures on the NASA dataset. |
 | **Ablation Study** | `notebooks/ablation/ablation_study.ipynb` | Trains architectural ablation variants (physics-guided vs. conventional scaling, individual degradation mechanisms, quantum vs. classical layers). |
 | **Generalization Study** | `notebooks/generalization/generalization_study.ipynb` | Evaluates generalization on unseen NASA cells (`B0018`, `B0032`), temporal extrapolation on `B0053`, and cross-dataset evaluation. |
+| **Explainability Analysis** | `notebooks/explainability.ipynb` | Computes 50-step Gauss-Legendre Integrated Gradients attributions across held-out test cycles, verifying axiomatic completeness and temperature kinetics. |
 | **CALCE Evaluation** | `notebooks/Calce.ipynb` | Trains and evaluates TE-Q-Transformer on the CALCE CS2 cross-cell and temporal extrapolation partition (`CS2_35`, `CS2_36`, `CS2_37`, `CS2_38`). |
 
 ---
 
 ## Running on Kaggle
 
-Each notebook dynamically resolves repository paths and can be executed in Kaggle environments:
+Each notebook dynamically resolves repository paths and runs seamlessly across local, Google Colab, and Kaggle environments:
 
 1. Create a new notebook on [Kaggle](https://www.kaggle.com/).
 2. Configure **Accelerator** under Notebook Settings:
-   - Select **GPU P100** or **GPU T4 x2** (Quantum circuit simulation over 512-point cycles executes faster with CUDA; baseline notebooks enforce `cuda:0`).
-   - If using CPU, ensure batch sizes and sequence subsets are adjusted accordingly.
-3. Set **Internet** to **ON** in the notebook settings panel.
+   - Select **GPU P100** or **GPU T4 x2** (Quantum circuit simulation executes significantly faster with CUDA acceleration).
+   - If using CPU, notebooks remain fully compatible.
+3. Set **Internet** to **ON** in the notebook settings panel (required for automatic PennyLane installation if not cached).
 4. In the initial notebook cell, clone the repository and install requirements:
    ```bash
    !git clone https://github.com/sulymansifat1/TE-Q-Transformer.git
    %cd TE-Q-Transformer
    !pip install -r requirements.txt
    ```
-5. **Datasets**: The processed `.npy` files for NASA and CALCE are tracked directly in the Git repository under `datasets/`, so no external dataset mount is required for standard runs.
+5. **Path Resolution & Datasets**:
+   - The processed `.npy` arrays for NASA and CALCE and reference model weights (`models/checkpoints/nasa_teq_transformer_best.pth`) are tracked directly in the Git repository.
+   - Every notebook automatically discovers its root whether running via Git clone in `/kaggle/working/TE-Q-Transformer` or attached as a Kaggle dataset under `/kaggle/input/`.
+   - All experimental figures and metric tables are automatically directed to a writable output directory (`/kaggle/working/outputs/`) to guarantee error-free execution against read-only mounts.
 6. Open and run the target notebook from the `notebooks/` directory.
 
 ---
