@@ -1,6 +1,6 @@
 # CALCE Battery Dataset (CS2 Series)
 
-This folder contains the processed CALCE battery arrays structured to match the NASA tensor contract for zero-shot cross-dataset evaluation.
+This folder contains the processed CALCE battery arrays structured to match the NASA tensor contract for cross-cell and temporal extrapolation evaluation.
 
 ---
 

@@ -77,10 +77,11 @@ datasets/
   - Target array (`{cell}_soh.npy`): Shape `[N]` (float32).
 
 ### Evaluation Protocol
-- CALCE is used strictly for **zero-shot cross-dataset transfer**:
-  - The model weights are frozen from the NASA training checkpoint.
-  - The frozen NASA train scaler transforms channels (0, 1, 3).
-  - Zero CALCE cycles are used for training, scaler fitting, or hyperparameter selection.
+- CALCE is evaluated under a strict cross-cell and temporal extrapolation protocol:
+  - **Training Split:** `CS2_35`, `CS2_36`, and the first 70% of `CS2_37` (2,309 cycles).
+  - **Unseen Cell Test Split:** Held-out cell `CS2_38` (966 cycles).
+  - **Temporal Extrapolation Split:** Extended cycling on the remaining 30% of `CS2_37` (275 cycles).
+  - Feature normalization is fitted strictly on the CALCE training partition.
 
 ---
 

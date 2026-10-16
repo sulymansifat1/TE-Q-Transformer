@@ -1,4 +1,4 @@
-"""CALCE CS2 battery dataset loader and zero-shot preprocessing."""
+"""CALCE CS2 battery dataset loader and preprocessing."""
 
 from __future__ import annotations
 
@@ -47,7 +47,7 @@ def get_calce_dataloaders(
     nasa_scaler: MinMaxScaler,
     batch_size: int = 8,
 ) -> Dict[str, DataLoader]:
-    """Prepares zero-shot CALCE DataLoaders using the frozen NASA train scaler."""
+    """Prepares CALCE DataLoaders using the provided scaler."""
     loaders: Dict[str, DataLoader] = {}
     for cell_id in CALCE_CELL_IDS:
         X_raw, y, _ = load_calce_cell(data_dir, cell_id)

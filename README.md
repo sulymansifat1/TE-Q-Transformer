@@ -65,11 +65,12 @@ TE-Q-Transformer is a hybrid quantum-classical deep learning framework for lithi
 │
 ├── notebooks/
 │   ├── benchmark/
-│   │   └── all_models_benchmark.ipynb         # NASA benchmark suite (proposed + 10 baselines)
+│   │   └── baseline_comparison_nasa.ipynb     # NASA contemporary baseline comparison (10 baselines + TE-Q-Transformer)
 │   ├── ablation/
 │   │   └── ablation_study.ipynb               # Architectural component ablation experiments
 │   ├── generalization/
 │   │   └── generalization_study.ipynb         # Unseen-cell and temporal extrapolation experiments
+│   ├── statistical_significance.ipynb         # Statistical hypothesis testing & block bootstrap (vs. iTransformer & QNN-GRU)
 │   ├── explainability.ipynb                   # Integrated Gradients feature attributions & temperature sensitivity
 │   └── Calce.ipynb                            # CALCE cross-cell and temporal extrapolation evaluation
 │
@@ -84,9 +85,7 @@ TE-Q-Transformer is a hybrid quantum-classical deep learning framework for lithi
 │   │       └── preprocess.py                  # CALCE raw Arbin Excel extraction script
 │   └── eval/
 │       ├── __init__.py
-│       ├── metrics.py                         # RMSE, MAE, MAPE, R2, MaxE calculations
-│       ├── zero_shot.py                       # Cross-cell evaluation helper
-│       └── nasa_calce_zero_shot.py            # Standalone evaluation script
+│       └── metrics.py                         # RMSE, MAE, MAPE, R2, MaxE calculations
 │
 └── tests/
     ├── test_models.py                         # Forward pass verification for all architectures
@@ -258,9 +257,10 @@ The repository provides executable Jupyter notebooks under `notebooks/`:
 
 | Notebook | Path | Description |
 | :--- | :--- | :--- |
-| **All Models Benchmark** | `notebooks/benchmark/all_models_benchmark.ipynb` | Trains and evaluates TE-Q-Transformer and all 10 baseline architectures on the NASA dataset. |
+| **Baseline Comparison NASA** | `notebooks/benchmark/baseline_comparison_nasa.ipynb` | Comprehensive contemporary benchmark evaluating all 10 baseline models (LSTM, GRU, CNN1D, TCN, DLinear, Transformer, PatchTST, iTransformer, QLSTM, QNN-GRU) alongside TE-Q-Transformer on the multi-temperature NASA dataset. |
 | **Ablation Study** | `notebooks/ablation/ablation_study.ipynb` | Trains architectural ablation variants (physics-guided vs. conventional scaling, individual degradation mechanisms, quantum vs. classical layers). |
-| **Generalization Study** | `notebooks/generalization/generalization_study.ipynb` | Evaluates generalization on unseen NASA cells (`B0018`, `B0032`), temporal extrapolation on `B0053`, and cross-dataset evaluation. |
+| **Generalization Study** | `notebooks/generalization/generalization_study.ipynb` | Evaluates generalization on unseen NASA cells (`B0018`, `B0032`) and temporal extrapolation on `B0053`. |
+| **Statistical Significance** | `notebooks/statistical_significance.ipynb` | Rigorous statistical validation (Paired $t$-test, Wilcoxon signed-rank, Holm-Bonferroni correction, and block bootstrap) establishing significance over leading baselines (iTransformer, QNN-GRU). |
 | **Explainability Analysis** | `notebooks/explainability.ipynb` | Computes 50-step Gauss-Legendre Integrated Gradients attributions across held-out test cycles, verifying axiomatic completeness and temperature kinetics. |
 | **CALCE Evaluation** | `notebooks/Calce.ipynb` | Trains and evaluates TE-Q-Transformer on the CALCE CS2 cross-cell and temporal extrapolation partition (`CS2_35`, `CS2_36`, `CS2_37`, `CS2_38`). |
 
