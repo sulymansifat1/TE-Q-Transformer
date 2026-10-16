@@ -28,6 +28,7 @@ ehthumbs.db
 Dataset/
 datasets/CALCE/raw/
 *.zip
+!datasets.zip
 *.tar.gz
 *.rar
 

@@ -86,30 +86,68 @@ TE-Q-Transformer is a hybrid quantum-classical deep learning framework for lithi
 
 ## Running on Kaggle (Quick Start)
 
-Every workflow notebook is self-contained, dynamically resolves dataset and checkpoint paths, and can be executed immediately in Kaggle cloud environments:
+Every notebook is completely self-contained and equipped with **dynamic path resolution**—it automatically searches and finds dataset arrays, checkpoints, and source code whether running via Kaggle Dataset mount (`/kaggle/input/`) or Git clone (`/kaggle/working/`). Full metrics are displayed in the notebook outputs, and all generated figures, tables, and reports are automatically packaged into a downloadable **`.zip` file** directly inside `/kaggle/working/`.
 
-1. Create a new notebook on [Kaggle](https://www.kaggle.com/).
-2. Configure **Accelerator** under Notebook Settings:
-   - Select **GPU P100** or **GPU T4 x2** (Quantum circuit simulation executes significantly faster with CUDA acceleration).
-   - If using CPU, notebooks remain fully compatible.
-3. Set **Internet** to **ON** in the notebook settings panel (required for automatic PennyLane installation if not cached).
-4. In the initial notebook cell, clone the repository and install requirements:
+---
+
+### Option 1: Kaggle Dataset Upload (`datasets.zip`) + Import Notebook (Recommended)
+
+This is the cleanest, zero-configuration method. All required data arrays, baseline predictions, model definitions, and the trained PyTorch checkpoint are pre-packaged into [`datasets.zip`](datasets.zip) (18.2 MB).
+
+#### Step 1: Upload `datasets.zip` as a Kaggle Dataset
+1. Download or locate [`datasets.zip`](datasets.zip) from the repository root.
+2. Go to [Kaggle](https://www.kaggle.com/) and click **+ Create** &rarr; **New Dataset**.
+3. Drag & drop `datasets.zip` into the upload modal.
+4. Enter any dataset title (e.g., `te-q-transformer-data`) and click **Create**.
+   > *Kaggle automatically extracts the zip under `/kaggle/input/<dataset-title>/`.*
+
+#### Step 2: Import & Attach Notebook
+1. In Kaggle, click **+ Create** &rarr; **New Notebook**.
+2. Go to **File** &rarr; **Import Notebook** &rarr; Upload whichever target notebook you want to run from `notebooks/`:
+   - `notebooks/benchmark/baseline_comparison_nasa.ipynb` &mdash; 10 Baselines vs. TE-Q-Transformer benchmark
+   - `notebooks/statistical_significance.ipynb` &mdash; Wilcoxon signed-rank tests & block bootstrap
+   - `notebooks/explainability.ipynb` &mdash; Integrated Gradients attributions & physics sanity check
+   - `notebooks/Calce.ipynb` &mdash; CALCE zero-shot / cross-cell evaluation
+   - `notebooks/ablation/ablation_study.ipynb` &mdash; 5 ablation configurations
+   - `notebooks/generalization/generalization_study.ipynb` &mdash; Unseen-cell & temporal extrapolation
+3. In the right-hand panel:
+   - Click **+ Add Input** &rarr; Search for your uploaded dataset &rarr; Click **+** (Attach).
+   - Set **Internet** to **ON** (required for `pip install pennylane`).
+   - (Optional) Set **Accelerator** to **GPU P100** or **GPU T4 x2** (Quantum circuit simulation runs faster with CUDA, but CPU is fully supported).
+
+#### Step 3: Run All Cells & Download Output Zip
+1. Click **Run All** (`Shift + Enter`).
+2. The notebook will automatically:
+   - Auto-detect dataset files, checkpoints, and libraries (no manual path edits needed).
+   - Install PennyLane if not present.
+   - Run complete inference, evaluation, and plotting.
+   - Print all publication-ready metrics and tables in the notebook output cells.
+   - Bundle all high-resolution figures (`.png`, `.pdf`), metric tables (`.csv`), and summary logs into a single downloadable **`*_Results.zip`** in `/kaggle/working/`.
+3. In the right panel under **Output** (`/kaggle/working`), click the three dots next to the generated zip file and select **Download**.
+
+| Notebook | Generated Output Zip | Output Artifacts |
+|---|---|---|
+| `baseline_comparison_nasa.ipynb` | `NASA_Baseline_Comparison_Results.zip` | Benchmark figures, 11-model metrics CSV, summary table |
+| `statistical_significance.ipynb` | `Statistical_Significance_Results.zip` | p-values table, bootstrap distribution plots, CI summary |
+| `explainability.ipynb` | `Explainability_Results.zip` | Attribution heatmaps, temperature sensitivity curves, sanity checks |
+| `Calce.ipynb` | `CALCE_Evaluation_Results.zip` | CALCE degradation curves, cross-chemistry transfer tables |
+| `ablation_study.ipynb` | `Ablation_Study_Results.zip` | Component ablation radar/bar charts, ablation metrics CSV |
+| `generalization_study.ipynb` | `Generalization_Study_Results.zip` | Unseen-cell trajectory plots, temporal extrapolation reports |
+
+---
+
+### Option 2: 1-Cell Quick Run (Git Clone inside Kaggle)
+
+If you prefer running directly in a blank Kaggle notebook without creating a dataset first:
+
+1. Create a new notebook on Kaggle, set **Accelerator** to **GPU P100** and **Internet** to **ON**.
+2. Run this single setup cell:
    ```bash
    !git clone https://github.com/sulymansifat1/TE-Q-Transformer.git
    %cd TE-Q-Transformer
    !pip install -r requirements.txt
    ```
-5. **Path Resolution & Datasets**:
-   - The processed `.npy` arrays for NASA and CALCE and reference model weights (`models/checkpoints/nasa_teq_transformer_best.pth`) are tracked directly in the Git repository.
-   - Every notebook automatically discovers its root whether running via Git clone in `/kaggle/working/TE-Q-Transformer` or attached as a Kaggle dataset under `/kaggle/input/`.
-   - All experimental figures and metric tables are automatically directed to a writable output directory (`/kaggle/working/outputs/`) to guarantee error-free execution against read-only mounts.
-6. Open and run the target notebook from the `notebooks/` directory:
-   - **Baseline Benchmark (10 Baselines + TE-Q-Transformer)**: `notebooks/benchmark/baseline_comparison_nasa.ipynb`
-   - **Statistical Significance Suite**: `notebooks/statistical_significance.ipynb`
-   - **Physics-Guided Explainability**: `notebooks/explainability.ipynb`
-   - **CALCE Evaluation**: `notebooks/Calce.ipynb`
-   - **Ablation Study**: `notebooks/ablation/ablation_study.ipynb`
-   - **Generalization Study**: `notebooks/generalization/generalization_study.ipynb`
+3. Open or copy cells from the desired notebook in `notebooks/`. All scripts detect the local cloned repository structure and direct outputs to `/kaggle/working/outputs/` and `/kaggle/working/*_Results.zip`.
 
 ---
 
