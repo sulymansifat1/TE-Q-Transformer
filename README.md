@@ -13,9 +13,9 @@ TE-Q-Transformer is a hybrid quantum-classical deep learning framework for lithi
 
 - **Proposed Architecture (`models/`)**: Core implementation of the TE-Q-Transformer architecture, reference checkpoints, and configuration factories (`TEQTransformer`, `TEQTransformerConfig`, `rich_entangler_config`).
 - **Workflow Notebooks (`notebooks/`)**: Self-contained Jupyter notebooks for full contemporary baseline benchmarking (10 baselines), ablation studies, generalization experiments, formal statistical significance validation, explainability analysis, and CALCE cross-cell evaluation.
-- **Data Loaders & Preprocessing (`src/data/`)**: PyTorch Dataset classes, data loader generators, and zero-leakage feature scaling routines for NASA and CALCE battery datasets, plus CALCE raw-to-processed extraction scripts.
+- **Pre-Packaged Datasets (`datasets.zip`)**: Ready-to-upload archive containing all processed NASA/CALCE `.npy` arrays, baseline predictions, and model checkpoint for 1-click Kaggle reproduction.
+- **Data Loaders & Preprocessing (`src/data/`)**: PyTorch Dataset classes, data loader generators, and zero-leakage feature scaling routines for NASA and CALCE battery datasets.
 - **Evaluation Utilities (`src/eval/`)**: Standard regression metrics calculation (`RMSE`, `MAE`, `MAPE`, `R2`, `MaxE`).
-- **Unit Test Suite (`tests/`)**: Automated tests verifying model forward passes, dataset array presence, tensor shape compliance, and scaling contracts.
 
 ---
 
@@ -29,7 +29,8 @@ TE-Q-Transformer is a hybrid quantum-classical deep learning framework for lithi
 
 ```
 .
-├── README.md                                  # Repository documentation and reproduction guide
+├── README.md                                  # Repository documentation and Kaggle reproduction guide
+├── datasets.zip                               # Self-contained archive for 1-click Kaggle Dataset upload (18.2 MB)
 ├── LICENSE                                    # MIT License
 ├── requirements.txt                           # Project dependencies
 ├── .gitignore                                 # Git ignore patterns
@@ -84,51 +85,58 @@ TE-Q-Transformer is a hybrid quantum-classical deep learning framework for lithi
 
 ---
 
-## Running on Kaggle (Quick Start)
+## Running on Kaggle (Evaluation & Reproduction Guide)
 
-Every notebook is completely self-contained and equipped with **dynamic path resolution**—it automatically searches and finds dataset arrays, checkpoints, and source code whether running via Kaggle Dataset mount (`/kaggle/input/`) or Git clone (`/kaggle/working/`). Full metrics are displayed in the notebook outputs, and all generated figures, tables, and reports are automatically packaged into a downloadable **`.zip` file** directly inside `/kaggle/working/`.
+To ensure effortless and 100% reproducible evaluation by reviewers without requiring local environment configuration, GPU driver setups, or quantum library compilation, **all experiments are designed to run directly inside Kaggle Notebooks**.
+
+Every notebook is fully self-contained and equipped with **dynamic path resolution**—it automatically detects dataset arrays, model checkpoints, and source code directly from the uploaded dataset mount. Full evaluation metrics and publication-ready plots are printed directly in the notebook outputs, and all generated figures, tables, and reports are automatically packaged into a downloadable **`.zip` file** directly inside `/kaggle/working/`.
 
 ---
 
-### Option 1: Kaggle Dataset Upload (`datasets.zip`) + Import Notebook (Recommended)
+### Step 1: Upload `datasets.zip` as a Kaggle Dataset
 
-This is the cleanest, zero-configuration method. All required data arrays, baseline predictions, model definitions, and the trained PyTorch checkpoint are pre-packaged into [`datasets.zip`](datasets.zip) (18.2 MB).
+All required processed data arrays, baseline prediction CSVs, the trained TE-Q-Transformer checkpoint, and source code are packaged into [`datasets.zip`](datasets.zip) (18.2 MB) located in the root of this repository.
 
-#### Step 1: Upload `datasets.zip` as a Kaggle Dataset
-1. Download or locate [`datasets.zip`](datasets.zip) from the repository root.
-2. Go to [Kaggle](https://www.kaggle.com/) and click **+ Create** &rarr; **New Dataset**.
+1. Download or locate [`datasets.zip`](datasets.zip) from this repository.
+2. In [Kaggle](https://www.kaggle.com/), click **+ Create** &rarr; **New Dataset**.
 3. Drag & drop `datasets.zip` into the upload modal.
-4. Enter any dataset title (e.g., `te-q-transformer-data`) and click **Create**.
+4. Enter any dataset title (for example, `te-q-transformer-data`) and click **Create**.
    > *Kaggle automatically extracts the zip under `/kaggle/input/<dataset-title>/`.*
 
-#### Step 2: Import & Attach Notebook
+---
+
+### Step 2: Import & Configure Notebook
+
 1. In Kaggle, click **+ Create** &rarr; **New Notebook**.
-2. Go to **File** &rarr; **Import Notebook** &rarr; Upload whichever target notebook you want to run from `notebooks/`:
+2. Go to **File** &rarr; **Import Notebook** &rarr; Select and upload whichever experiment notebook you wish to review from the `notebooks/` directory:
    - `notebooks/benchmark/baseline_comparison_nasa.ipynb` &mdash; 10 Baselines vs. TE-Q-Transformer benchmark
    - `notebooks/statistical_significance.ipynb` &mdash; Wilcoxon signed-rank tests & block bootstrap
    - `notebooks/explainability.ipynb` &mdash; Integrated Gradients attributions & physics sanity check
    - `notebooks/Calce.ipynb` &mdash; CALCE zero-shot / cross-cell evaluation
-   - `notebooks/ablation/ablation_study.ipynb` &mdash; 5 ablation configurations
+   - `notebooks/ablation/ablation_study.ipynb` &mdash; 5 architectural ablation configurations
    - `notebooks/generalization/generalization_study.ipynb` &mdash; Unseen-cell & temporal extrapolation
-3. In the right-hand panel:
-   - Click **+ Add Input** &rarr; Search for your uploaded dataset &rarr; Click **+** (Attach).
+3. In the right-hand settings panel:
+   - Click **+ Add Input** &rarr; Select **Your Datasets** &rarr; Click **+** to attach your uploaded dataset.
    - Set **Internet** to **ON** (required for `pip install pennylane`).
-   - (Optional) Set **Accelerator** to **GPU P100** or **GPU T4 x2** (Quantum circuit simulation runs faster with CUDA, but CPU is fully supported).
+   - Set **Accelerator** to **GPU P100** or **GPU T4 x2** (Quantum circuit simulation executes significantly faster with GPU acceleration; CPU is also supported).
 
-#### Step 3: Run All Cells & Download Output Zip
+---
+
+### Step 3: Run All & View / Download Results
+
 1. Click **Run All** (`Shift + Enter`).
 2. The notebook will automatically:
-   - Auto-detect dataset files, checkpoints, and libraries (no manual path edits needed).
-   - Install PennyLane if not present.
-   - Run complete inference, evaluation, and plotting.
-   - Print all publication-ready metrics and tables in the notebook output cells.
-   - Bundle all high-resolution figures (`.png`, `.pdf`), metric tables (`.csv`), and summary logs into a single downloadable **`*_Results.zip`** in `/kaggle/working/`.
-3. In the right panel under **Output** (`/kaggle/working`), click the three dots next to the generated zip file and select **Download**.
+   - Auto-detect dataset files, checkpoints, and dependencies without any manual path adjustments.
+   - Install PennyLane if not already present.
+   - Execute inference, evaluations, and visualizations.
+   - Display all publication-quality comparison figures and numerical metric tables directly in the output cells.
+   - Package all high-resolution figures (`.png`, `.pdf`), metric tables (`.csv`), and summary logs into a single downloadable **`*_Results.zip`** in `/kaggle/working/`.
+3. In the right-hand panel under **Output** (`/kaggle/working`), click the three dots next to the generated zip file and select **Download**.
 
-| Notebook | Generated Output Zip | Output Artifacts |
+| Experiment Notebook | Generated Output Zip | Output Artifacts Included |
 |---|---|---|
-| `baseline_comparison_nasa.ipynb` | `NASA_Baseline_Comparison_Results.zip` | Benchmark figures, 11-model metrics CSV, summary table |
-| `statistical_significance.ipynb` | `Statistical_Significance_Results.zip` | p-values table, bootstrap distribution plots, CI summary |
+| `baseline_comparison_nasa.ipynb` | `NASA_Baseline_Comparison_Results.zip` | Benchmark figures, 11-model comparison CSV, paper summary table |
+| `statistical_significance.ipynb` | `Statistical_Significance_Results.zip` | $p$-values table, bootstrap distribution plots, confidence intervals |
 | `explainability.ipynb` | `Explainability_Results.zip` | Attribution heatmaps, temperature sensitivity curves, sanity checks |
 | `Calce.ipynb` | `CALCE_Evaluation_Results.zip` | CALCE degradation curves, cross-chemistry transfer tables |
 | `ablation_study.ipynb` | `Ablation_Study_Results.zip` | Component ablation radar/bar charts, ablation metrics CSV |
@@ -136,64 +144,7 @@ This is the cleanest, zero-configuration method. All required data arrays, basel
 
 ---
 
-### Option 2: 1-Cell Quick Run (Git Clone inside Kaggle)
-
-If you prefer running directly in a blank Kaggle notebook without creating a dataset first:
-
-1. Create a new notebook on Kaggle, set **Accelerator** to **GPU P100** and **Internet** to **ON**.
-2. Run this single setup cell:
-   ```bash
-   !git clone https://github.com/sulymansifat1/TE-Q-Transformer.git
-   %cd TE-Q-Transformer
-   !pip install -r requirements.txt
-   ```
-3. Open or copy cells from the desired notebook in `notebooks/`. All scripts detect the local cloned repository structure and direct outputs to `/kaggle/working/outputs/` and `/kaggle/working/*_Results.zip`.
-
----
-
-## Local Environment & Installation
-
-### Requirements
-- Python 3.10 or higher
-- PyTorch >= 2.0.0
-- PennyLane >= 0.35.0
-- NumPy >= 1.24.0, < 2.0.0
-- SciPy >= 1.10.0
-- Pandas >= 2.0.0
-- Scikit-Learn >= 1.3.0
-
-### Local Setup
-
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/sulymansifat1/TE-Q-Transformer.git
-   cd TE-Q-Transformer
-   ```
-
-2. **Create and activate a virtual environment:**
-   ```bash
-   # On Linux/macOS:
-   python3 -m venv venv
-   source venv/bin/activate
-
-   # On Windows:
-   python -m venv venv
-   .\venv\Scripts\activate
-   ```
-
-3. **Install dependencies:**
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-4. **Verify the installation by running the test suite:**
-   ```bash
-   python -m unittest discover -s tests -p "test_*.py"
-   ```
-
----
-
-## Dataset Preparation & Contracts
+## Dataset Specifications & Experimental Partitions
 
 The repository processes battery cycle measurements into fixed-length arrays matching a strict input contract.
 
@@ -232,101 +183,6 @@ The repository processes battery cycle measurements into fixed-length arrays mat
   - **Training Split (2,309 cycles)**: `CS2_35`, `CS2_36`, and the first 70% of `CS2_37`.
   - **Held-Out Unseen Cell Test Split (966 cycles)**: `CS2_38`.
   - **Temporal Extrapolation Test Split (275 cycles)**: Remaining 30% of `CS2_37` (`CS2_37_test`).
-- **Preprocessing from Raw Files (Optional)**:
-  Processed CALCE `.npy` arrays are tracked in the repository. To re-extract from raw Arbin Excel logs:
-  ```bash
-  python -m src.data.calce.preprocess --raw-root <path_to_raw_calce> --output-dir datasets/CALCE/processed
-  ```
-
----
-
-## Usage Guide
-
-### 1. Instantiating the Proposed Model
-
-```python
-import torch
-from models.proposed import TEQTransformer, rich_entangler_config
-
-# Load standard model configuration
-config = rich_entangler_config()
-model = TEQTransformer(config)
-
-# Dummy input: batch_size=2, sequence_length=512, channels=4
-# Channels: (Voltage, Current, Temperature_C, Normalized_Time)
-x = torch.randn(2, 512, 4)
-x[:, :, 2] = 24.0  # Temperature in Celsius
-
-# Forward pass: [2, 512, 4] -> [2]
-soh_pred = model(x)
-print(f"Output shape: {soh_pred.shape}")  # torch.Size([2])
-```
-
-### 2. Loading Battery Datasets (NASA & CALCE)
-
-#### NASA Ames DataLoaders
-```python
-from pathlib import Path
-from src.data.nasa_loader import get_nasa_dataloaders
-
-data_dir = Path("datasets/NASA/processed")
-train_loader, test_loaders, scaler = get_nasa_dataloaders(data_dir, batch_size=8)
-
-print(f"Training batches: {len(train_loader)} ({len(train_loader.dataset)} cycles)")
-for cell_id, loader in test_loaders.items():
-    print(f"Test partition {cell_id}: {len(loader.dataset)} cycles")
-```
-
-#### CALCE Cell Loading
-```python
-from pathlib import Path
-from src.data.calce_loader import load_calce_cell, CALCE_CELL_IDS
-
-calce_dir = Path("datasets/CALCE/processed")
-for cell_id in CALCE_CELL_IDS:
-    X, y, cycles = load_calce_cell(calce_dir, cell_id)
-    print(f"{cell_id}: X shape {X.shape}, y shape {y.shape}, cycles {len(cycles)}")
-```
-
-### 3. Running Workflow Notebooks
-
-The repository provides executable Jupyter notebooks under `notebooks/`:
-
-| Notebook | Path | Description |
-| :--- | :--- | :--- |
-| **Baseline Comparison NASA** | `notebooks/benchmark/baseline_comparison_nasa.ipynb` | Comprehensive contemporary benchmark evaluating all 10 baseline models (LSTM, GRU, CNN1D, TCN, DLinear, Transformer, PatchTST, iTransformer, QLSTM, QNN-GRU) alongside TE-Q-Transformer on the multi-temperature NASA dataset. |
-| **Ablation Study** | `notebooks/ablation/ablation_study.ipynb` | Trains architectural ablation variants (physics-guided vs. conventional scaling, individual degradation mechanisms, quantum vs. classical layers). |
-| **Generalization Study** | `notebooks/generalization/generalization_study.ipynb` | Evaluates generalization on unseen NASA cells (`B0018`, `B0032`) and temporal extrapolation on `B0053`. |
-| **Statistical Significance** | `notebooks/statistical_significance.ipynb` | Rigorous statistical validation (Paired $t$-test, Wilcoxon signed-rank, Holm-Bonferroni correction, and block bootstrap) establishing significance over leading baselines (iTransformer, QNN-GRU). |
-| **Explainability Analysis** | `notebooks/explainability.ipynb` | Computes 50-step Gauss-Legendre Integrated Gradients attributions across held-out test cycles, verifying axiomatic completeness and temperature kinetics. |
-| **CALCE Evaluation** | `notebooks/Calce.ipynb` | Trains and evaluates TE-Q-Transformer on the CALCE CS2 cross-cell and temporal extrapolation partition (`CS2_35`, `CS2_36`, `CS2_37`, `CS2_38`). |
-
----
-
-## Testing
-
-The test suite validates model construction, dataset integrity, and preprocessing rules:
-
-```bash
-python -m unittest discover -s tests -p "test_*.py"
-```
-
-### What the Tests Verify
-
-- **`tests/test_models.py`**:
-  - Instantiates `TEQTransformer` with `rich_entangler_config()` and confirms the forward pass transforms `[B, 512, 4]` to `[B]` without NaN or infinite outputs.
-  - Verifies batch invariance across single and multi-cycle evaluation windows.
-  - Validates configuration parameters against the authoritative manuscript settings.
-- **`tests/test_datasets.py`**:
-  - Verifies the physical presence of all required `.npy` arrays for NASA (`B0005`, `B0006`, `B0007`, `B0018`, `B0029`, `B0030`, `B0031`, `B0032`, `B0053`).
-  - Verifies the physical presence of processed CALCE files (`CS2_35`, `CS2_36`, `CS2_37`, `CS2_38`).
-  - Validates that array dimensions match `[N, 512, 4]` for inputs and `[N]` for targets.
-- **`tests/test_scaling.py`**:
-  - Verifies that `transform_with_scaler` maps channels 0, 1, and 3 to `[0, 1]`.
-  - Asserts that channel 2 (temperature in Celsius) remains unmodified to preserve physical Arrhenius dynamics.
-- **`tests/test_calce_preprocess.py`**:
-  - Tests the discharge phase resampling function ensuring output shapes of `(512, 4)` and endpoint preservation.
-  - Tests validation filter rules for identifying incomplete discharge cycles.
 
 ---
 
